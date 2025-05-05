@@ -1,0 +1,16 @@
+{
+  "name": "vidus-node-vue-quickstart-fronted",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "vue": "^3.2.13",
+    "vidus-vue": "^1.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~5.0.0"
+  }
+}
