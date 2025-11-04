@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "vue": "^3.2.13",
-    "vidus-vue": "^1.0.0"
+    "vidus-vue": "^1.1.0"
   },
   "devDependencies": {
     "@vue/cli-service": "~5.0.0"

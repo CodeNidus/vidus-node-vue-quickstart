@@ -1,15 +1,15 @@
 <template>
   <div>
-    <div class="demo-navbar">
-      <div
-          class="header"
-          :class="{ tiny: token }"
-      >
+    <div
+      class="demo-navbar"
+      :class="{ tiny: token }"
+    >
+      <div class="header">
         <h1>Vidus Demo</h1>
         <p class="subtitle">Vidus node.js + vue Quickstart</p>
       </div>
 
-      <div>
+      <div class="user-info">
         <div
             v-if="!token"
             class="text-field"
@@ -28,31 +28,25 @@
       </div>
 
       <button
-          v-if="!token"
-          @click="getUserToken"
-          :disabled="!userEmailIsValid || loading"
+        v-if="!token"
+        @click="getUserToken"
+        :disabled="!userEmailIsValid || loading"
       >
         Get Token
       </button>
-
       <button
-          v-if="token"
+          v-else
           @click="clearUserToken"
       >
         Remove Token
       </button>
-
-      <button v-if="1===2" @click="showRooms = !showRooms">
-        {{ (!showRooms)? 'Show Rooms' : 'Hide Rooms'}}
-      </button>
-
     </div>
 
     <div class="divider"></div>
 
     <div
-        v-if="!token"
-        class="card welcome-box"
+      v-if="!token"
+      class="card welcome-box"
     >
       <div class="title">
         Welcome to the Vidus WebRTC Video Conference Demo Module, a powerful and intuitive component built using the
@@ -76,31 +70,33 @@
         Dive in and explore the endless possibilities Vidus has to offer!
       </p>
       <div>
-        <a href="https://www.codenidus.com" target="_blank" class="btn btn-outline">Documentation</a>
+        <a href="https://codenidus.github.io/vidus-documentation/" target="_blank" class="btn btn-outline">Documentation</a>
       </div>
     </div>
     <div v-else>
       <VCRooms
-          v-if="!roomId"
-          @onSelectRoom="setRoomId"
+        v-if="!roomId"
+        @onSelectRoom="setRoomId"
       />
 
       <VCRoomJoin
-          v-else
-          :room-id="roomId"
-          close-url="/"
+        v-else
+        :room-id="roomId"
+        @onCloseConference="closeConference"
       />
     </div>
   </div>
 </template>
 
 <script>
+import { nextTick } from "vue";
+
 export default {
   name: 'App',
   inject: ['webrtc'],
   computed: {
     userEmailIsValid() {
-      return (!!this.username && this.validateEmail(this.username))
+      return (!!this.username && this.validateEmail(this.username));
     }
   },
   data() {
@@ -112,32 +108,50 @@ export default {
       loading: false,
     }
   },
+  mounted() {
+    this.checkUrlParams();
+    this.clearUserToken();
+  },
   methods: {
     setRoomId(room_id) {
-      this.roomId = room_id
-      this.showRooms = false
+      this.roomId = room_id;
+      this.showRooms = false;
+    },
+    checkUrlParams() {
+      const url = new URL(window.location.href);
+      const queryParams = url.searchParams;
+
+      if (queryParams.has('room_id')) {
+        this.setRoomId(queryParams.get('room_id'));
+      }
     },
     getUserToken() {
-      this.loading = true
+      this.loading = true;
 
       this.webrtc.getUserToken(token => {
-        this.token = token
-        this.loading = false
+        this.token = token;
+        this.loading = false;
       }, error => {
-        console.log(error)
+        console.log(error);
       })
     },
     clearUserToken() {
-      this.webrtc.Room.left(this.roomId, {})
-      this.webrtc.helpers.userToken.removeToken()
-      this.token = null
+      this.webrtc.emit('onTerminateConference');
+      this.webrtc.helpers.userToken.removeToken();
+
+      nextTick(() => {
+        this.roomId = null;
+        this.token = null;
+      });
     },
     validateEmail(email) {
       return email.match(
           /^(([^<>()[\]\\.,;:\s@\\"]+(\.[^<>()[\]\\.,;:\s@\\"]+)*)|(\\".+\\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      )
+      );
     },
-
+    closeConference() {
+      this.roomId = null;
+    },
   },
 }
 </script>
@@ -150,6 +164,18 @@ export default {
   justify-content: flex-start;
   align-items: flex-end;
   gap: 20px;
+
+  @media screen and (max-width: 480px) {
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .text-field {
+      input {
+        min-width: unset;
+      }
+    }
+  }
 
   .header {
     padding: 0 50px;
@@ -166,19 +192,61 @@ export default {
       transition: .4s all;
     }
 
-    &.tiny {
+    @media screen and (max-width: 480px) {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 0;
+
       h1 {
         font-size: 1.5em;
-      }
-
-      .subtitle {
-        font-size: 0.7em;
       }
     }
   }
 
   .username-label {
     margin: 10px 0;
+  }
+
+  &.tiny {
+
+    align-items: center;
+    @media screen and (max-width: 480px) {
+      justify-content: space-between;
+    }
+
+    .header {
+      h1 {
+        font-size: 1.5em;
+
+        @media screen and (max-width: 480px) {
+          font-size: 1.2em;
+        }
+      }
+
+      .subtitle {
+        font-size: 0.7em;
+
+        @media screen and (max-width: 480px) {
+          display: none;
+        }
+      }
+    }
+
+    .user-info {
+      @media screen and (max-width: 480px) {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-align: center;
+      }
+    }
+
+    button {
+      @media screen and (max-width: 480px) {
+        padding: 5px 8px;
+      }
+    }
   }
 }
 
@@ -211,8 +279,6 @@ export default {
       font-weight: bold;
     }
   }
-
-
 }
 
 </style>
