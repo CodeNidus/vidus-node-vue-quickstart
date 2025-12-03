@@ -52,13 +52,27 @@
         Welcome to the Vidus WebRTC Video Conference Demo Module, a powerful and intuitive component built using the
         <span>Vue.js</span> library.
       </div>
-      <div>
+      <div v-if="!roomId">
         <ol>
           <li>Enter your desired e-mail address and get access demo token</li>
           <li>Create your first room in project</li>
           <li>Get rooms list from server</li>
           <li>Select created room, join & enjoy!</li>
         </ol>
+      </div>
+      <div class="join-message" v-else>
+        <div class="title">Join Existing Conference</div>
+        <p>You're about to enter Vidus Video Conference Room: <strong>{{ roomId }}</strong></p>
+        <ol>
+          <li>Enter your desired e-mail address and get access demo token</li>
+          <li>Enter your display name</li>
+          <li>Configure your devices</li>
+          <li>Join the ongoing session</li>
+        </ol>
+        <p>
+          <strong>Note:</strong> You're directly accessing a specific conference room. Verify this is the correct
+          meeting before joining.
+        </p>
       </div>
       <p>
         <span>Vidus</span> is a JavaScript-based video conferencing toolkit designed to seamlessly integrate real-time video communication into your web and mobile applications with minimal effort. Whether you're developing for browsers or mobile platforms, Vidus empowers you to embed high-quality <span>video conferencing</span> capabilities in just a matter of minutes.
@@ -103,20 +117,14 @@ export default {
     return {
       roomId: null,
       username: 'test@test.com',
-      showRooms: false,
       token: null,
       loading: false,
     }
   },
   mounted() {
     this.checkUrlParams();
-    this.clearUserToken();
   },
   methods: {
-    setRoomId(room_id) {
-      this.roomId = room_id;
-      this.showRooms = false;
-    },
     checkUrlParams() {
       const url = new URL(window.location.href);
       const queryParams = url.searchParams;
@@ -124,6 +132,9 @@ export default {
       if (queryParams.has('room_id')) {
         this.setRoomId(queryParams.get('room_id'));
       }
+    },
+    setRoomId(room_id) {
+      this.roomId = room_id;
     },
     getUserToken() {
       this.loading = true;
@@ -278,6 +289,12 @@ export default {
     &.slogan {
       font-weight: bold;
     }
+  }
+
+  .join-message {
+    padding: 15px;
+    margin: 20px 0;
+    background: #fffbeb;
   }
 }
 
